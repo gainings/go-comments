@@ -48,12 +48,12 @@ func main() {
 			}
 		case *ast.GenDecl:
 			for _, spec := range nt.Specs {
-				switch nt := spec.(type) {
+				switch spt := spec.(type) {
 				case *ast.TypeSpec:
-					if nt.Name.IsExported() && checkComment(nt.Doc.Text(), nt.Name.Name) {
+					if spt.Name.IsExported() && checkComment(spt.Doc.Text(), spt.Name.Name) {
 						comment := &ast.Comment{
-							Text:  fmt.Sprintf("//%s is TODO: need to enter a comment", nt.Name),
-							Slash: nt.Pos() - 1,
+							Text:  fmt.Sprintf("//%s is TODO: need to enter a comment tok.Pos", spt.Name),
+							Slash: nt.TokPos - 1,
 						}
 						cg := &ast.CommentGroup{
 							List: []*ast.Comment{comment},
@@ -62,11 +62,17 @@ func main() {
 						comments = append(comments, cg)
 					}
 				case *ast.ValueSpec:
-					for _, name := range nt.Names {
+					for _, name := range spt.Names {
 						if name.IsExported() && checkComment(nt.Doc.Text(), name.Name) {
+							var pos token.Pos
+							if nt.Lparen == 0 {
+								pos = nt.Pos()
+							} else {
+								pos = name.Pos()
+							}
 							comment := &ast.Comment{
 								Text:  fmt.Sprintf("//%s is TODO: need to enter a comment", name.Name),
-								Slash: nt.Pos() - 1,
+								Slash: pos - 1,
 							}
 							cg := &ast.CommentGroup{
 								List: []*ast.Comment{comment},
