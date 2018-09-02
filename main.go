@@ -52,7 +52,7 @@ func main() {
 				case *ast.TypeSpec:
 					if spt.Name.IsExported() && checkComment(spt.Doc.Text(), spt.Name.Name) {
 						comment := &ast.Comment{
-							Text:  fmt.Sprintf("//%s is TODO: need to enter a comment tok.Pos", spt.Name),
+							Text:  fmt.Sprintf("//%s is TODO: need to enter a comment", spt.Name),
 							Slash: nt.TokPos - 1,
 						}
 						cg := &ast.CommentGroup{
