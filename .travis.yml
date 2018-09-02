@@ -11,3 +11,6 @@ go:
 script:
  - go vet ./...
  - go test -v ./...
+
+notifications:
+  email: false
