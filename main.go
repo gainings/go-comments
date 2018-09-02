@@ -88,7 +88,11 @@ func main() {
 	})
 	sort.Slice(comments, func(i, j int) bool { return comments[i].Pos() < comments[j].Pos() })
 	f.Comments = comments
-	if err := printer.Fprint(os.Stdout, fset, f); err != nil {
+	p := printer.Config{
+		Mode:     printer.UseSpaces | printer.TabIndent,
+		Tabwidth: 8,
+	}
+	if err := p.Fprint(os.Stdout, fset, f); err != nil {
 		log.Fatal(err)
 	}
 }
