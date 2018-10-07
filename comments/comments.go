@@ -1,33 +1,32 @@
-package main
+package comments
 
 import (
-	"errors"
+	"bytes"
 	"fmt"
 	"go/ast"
+	"go/format"
 	"go/parser"
 	"go/printer"
 	"go/token"
-	"log"
-	"os"
+	"io/ioutil"
 	"sort"
 	"strings"
 )
 
-func main() {
+//Process is adding comment templates to should-commented variable names, structure definitions, and function names
+func Process(filename string, src []byte) ([]byte, error) {
+	if src == nil {
+		b, err := ioutil.ReadFile(filename)
+		if err != nil {
+			return nil, err
+		}
+		src = b
+	}
 	fset := token.NewFileSet()
-	if len(os.Args) == 0 {
-		log.Fatal(errors.New("args is too short"))
-	}
-	fname := os.Args[1]
-	_, err := os.Stat(fname)
+	f, err := parser.ParseFile(fset, filename, src, parser.ParseComments)
 	if err != nil {
-		log.Fatal(errors.New("file not exists"))
+		return nil, err
 	}
-	f, err := parser.ParseFile(fset, fname, nil, parser.ParseComments)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	comments := []*ast.CommentGroup{}
 	for _, cg := range f.Comments {
 		comments = append(comments, cg)
@@ -92,9 +91,16 @@ func main() {
 		Mode:     printer.UseSpaces | printer.TabIndent,
 		Tabwidth: 8,
 	}
-	if err := p.Fprint(os.Stdout, fset, f); err != nil {
-		log.Fatal(err)
+	var buf bytes.Buffer
+	err = p.Fprint(&buf, fset, f)
+	if err != nil {
+		return nil, err
 	}
+	out, err := format.Source(buf.Bytes())
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func checkComment(com, funcName string) bool {
