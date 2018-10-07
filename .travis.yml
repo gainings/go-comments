@@ -11,6 +11,10 @@ go:
 script:
  - go vet ./...
  - go test -v ./...
+ - make setup
 
 notifications:
   email: false
+
+after_success:
+  - test -n "$TRAVIS_TAG" && script/release.sh
