@@ -17,4 +17,4 @@ notifications:
   email: false
 
 after_success:
-  - test -n "$TRAVIS_TAG" && script/release.sh
+  - if [ "$TRAVIS_GO_VERSION" = "tip" ]; then test -n "$TRAVIS_TAG" && script/release.sh; fi
